@@ -1,35 +1,50 @@
-#include <Servo.h>
+#include <Stepper.h>
 
-int V_Distance = 0;
+const int pingPin = 2;
+const int motorPin = 13;
+void setup() {
 
-Servo servo_6;
+  Serial.begin(9600);
+  pinMode(motorPin, OUTPUT);
+}
 
-long readUltrasonicDistance(int triggerPin, int echoPin)
-{
-  pinMode(triggerPin, OUTPUT);  
-  digitalWrite(triggerPin, LOW);
+void loop() {
+  
+  int duration, cm;
+
+
+  pinMode(pingPin, OUTPUT);
+  digitalWrite(pingPin, LOW);
   delayMicroseconds(2);
-  digitalWrite(triggerPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(triggerPin, LOW);
-  pinMode(echoPin, INPUT);
-  return pulseIn(echoPin, HIGH);
-}
+  digitalWrite(pingPin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(pingPin, LOW);
 
-void setup()
-{
-  servo_6.attach(6, 500, 2500);
 
-}
+  pinMode(pingPin, INPUT);
+  duration = pulseIn(pingPin, HIGH);
 
-void loop()
-{
-  servo_6.write(90);
-  V_Distance = 0.01723 * readUltrasonicDistance(7, 7);
-  if (V_Distance <= 100) {
-    servo_6.write(180);
-    delay(2000); 
-    servo_6.write(90);
+
+  cm = microsecondsToCentimeters(duration);
+
+
+  Serial.print("Distance: ");
+  Serial.print(cm);
+  Serial.print("cm");
+  Serial.println();
+
+  if(cm < 329) {
+    digitalWrite(motorPin, HIGH);
+    delay(4000); 
   }
-  servo_6.write(90);
+  else {
+    digitalWrite(motorPin, HIGH);
+  }
+  digitalWrite(motorPin, LOW);
+  delay(1000); 
+}
+
+long microsecondsToCentimeters(long microseconds) {
+
+  return microseconds / 29 / 2;
 }
